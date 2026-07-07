@@ -1,6 +1,6 @@
 ---
 name: infra-agent-skills
-description: Skills for the `hub_infra` assistant: Terraform module creation, Mosquitto MQTT config, GitHub Actions CI workflows, S3 backend setup, and multi-environment infrastructure management. The coordinator routes requests to single-task agents.
+description: Skills for the `hub_infra` assistant: Terraform module creation, Mosquitto MQTT config, GitHub Actions CI workflows, drift and security scanning, FinOps cost analysis, S3 backend setup, and multi-environment infrastructure management. The coordinator routes requests to single-task agents.
 ---
 
 # Infra Agent — Skills Catalog
@@ -11,7 +11,7 @@ This document describes the skills, inputs/outputs, tools, safety constraints, a
 - Provide a compact, discoverable list of the agent's actionable capabilities so maintainers can quickly know what to ask and what to expect.
 
 **Quick summary**
-- **Primary domain:** Terraform-based AWS infrastructure (modules, top-level config, state backends), Mosquitto MQTT broker, and GitHub Actions CI/CD.
+- **Primary domain:** Terraform-based AWS infrastructure (modules, top-level config, state backends), Mosquitto MQTT broker, GitHub Actions CI/CD, drift/security scanning, and FinOps cost analysis.
 - **Primary outputs:** repository patches/diffs, Mosquitto config files, GitHub Actions workflow files, CI job templates, README snippets, and PR-ready descriptions.
 - **Primary safety posture:** Prepare and validate IaC; never autonomously modify live production state without explicit maintainer confirmation.
 
@@ -29,6 +29,25 @@ This document describes the skills, inputs/outputs, tools, safety constraints, a
 - Define ACL rules for topic-level access control
 - Configure bridges to upstream MQTT brokers
 - Set TLS certificate paths and cipher configuration
+
+### Drift & Security Scanning (handled by `infra-drift-security` agent)
+- Run `terraform plan -refresh-only` to detect resources changed outside Terraform
+- Flag shadow IT — AWS resources not managed in Terraform code
+- Audit Security Groups for `0.0.0.0/0` ingress rules
+- Check S3 buckets for public access (ACLs + bucket policies)
+- Detect unencrypted RDS, EBS, and S3 resources
+- Scan IAM policies for wildcard actions (`*:*`)
+- Verify CloudTrail and VPC Flow Logs are enabled
+- Identify resources missing standard tags (`Environment`, `Project`, `ManagedBy`)
+
+### FinOps / Cost Optimization (handled by `infra-finops` agent)
+- Query CloudWatch metrics to detect low-utilization RDS (<5% CPU) and ElastiCache instances
+- Find orphaned EBS volumes and unused Elastic IPs
+- Analyze S3 storage classes — recommend GLACIER/DEEP_ARCHIVE transitions
+- Identify idle load balancers with low request counts
+- Check reserved instance coverage and suggest RI purchases
+- Calculate monthly savings estimates with AWS on-demand pricing
+- Map findings to specific Terraform file:line change suggestions
 
 ### CI/CD Workflows (handled by `infra-ci` agent)
 - Generate or update GitHub Actions workflows for `terraform fmt`, `validate`, `plan`, `apply`
@@ -48,6 +67,8 @@ This document describes the skills, inputs/outputs, tools, safety constraints, a
 - `environment` — which environment to target: `dev`, `staging`, `prod`
 - `module` — which Terraform module to create or modify
 - `listener` — port and protocol for Mosquitto MQTT
+- `lookback_days` — CloudWatch metrics window for utilization analysis (default: 14)
+- `threshold_cpu` — CPU utilization warning threshold as percentage (default: 5)
 - `s3_state_bucket` or `S3_STATE_BUCKET` secret — Terraform state bucket
 - `dynamodb_lock_table` or `DDB_LOCK_TABLE` secret — optional lock table
 - `aws_region` — region to use (default `us-east-1` if unspecified)
@@ -59,6 +80,7 @@ This document describes the skills, inputs/outputs, tools, safety constraints, a
 - Workflow YAML files in `/.github/workflows/`
 - README / docs snippets describing required secrets and usage
 - PR-ready changelog/summary and verification checklist
+- Cost optimization reports with savings estimates and Terraform change references
 - Patches (diffs) applied with agent tools when given explicit permission
 
 ## Tools the agent uses
@@ -92,6 +114,11 @@ This document describes the skills, inputs/outputs, tools, safety constraints, a
 - "Create an `infra.yml` workflow supporting `dev`, `staging`, `prod` with manual approval for prod apply."
 - "Add a `tflint` job to the existing infra workflow."
 
+### FinOps / Cost Optimization
+- "Run a full FinOps scan on prod — find underutilized resources and orphaned assets."
+- "Check if our dev RDS instance is over-provisioned and can be downsized."
+- "Analyze S3 storage costs — are there objects that should be in DEEP_ARCHIVE?"
+
 ## Agent Architecture
 
 The coordinator (`infra-agent`) routes to single-task agents:
@@ -102,6 +129,8 @@ The coordinator (`infra-agent`) routes to single-task agents:
 | `infra-mosquitto` | Mosquitto MQTT broker config |
 | `infra-ci` | GitHub Actions CI workflows |
 | `infra-planner` | Implementation planning |
+| `infra-drift-security` | Drift detection & security scanning |
+| `infra-finops` | FinOps cost analysis & right-sizing |
 | `infra-code-reviewer` | Code review before merge |
 
 ## How progress is reported

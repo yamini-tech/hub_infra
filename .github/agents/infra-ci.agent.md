@@ -1,7 +1,7 @@
 ---
 name: infra-ci
 description: "Single-task agent for creating and updating GitHub Actions CI workflows for Terraform validation, linting, planning, and apply. Does NOT handle Terraform modules or Mosquitto config."
-tools: Read, Write, Edit, Bash, Glob, Grep
+tools: [read, write, edit, bash, glob, grep]
 ---
 
 # Infra CI Agent

@@ -13,6 +13,8 @@ This coordinator does NOT implement tasks directly. It identifies the task type 
 | Configure Mosquitto MQTT broker | `infra-mosquitto` | `infra-mosquitto-prompt.prompt.md` |
 | Create/update CI workflows | `infra-ci` | `infra-ci-prompt.prompt.md` |
 | Generate an implementation plan | `infra-planner` | `infra-planner-prompt.prompt.md` |
+| Run drift/security scans | `infra-drift-security` | `infra-drift-security-prompt.prompt.md` |
+| Run FinOps cost analysis | `infra-finops` | `infra-finops-prompt.prompt.md` |
 | Review code before merge | `infra-code-reviewer` | `infra-code-reviewer-prompt.prompt.md` |
 
 If the request spans multiple domains, ask the user to break it into single-task prompts.

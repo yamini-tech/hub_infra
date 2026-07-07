@@ -46,6 +46,8 @@ This repository uses the following agents:
 | `infra-mosquitto` | `.github/agents/infra-mosquitto.agent.md` | Mosquitto MQTT broker configuration |
 | `infra-ci` | `.github/agents/infra-ci.agent.md` | GitHub Actions CI/CD workflows |
 | `infra-planner` | `.github/agents/infra-planner.agent.md` | Implementation planning |
+| `infra-drift-security` | `.github/agents/infra-drift-security.agent.md` | Drift detection & security auditing |
+| `infra-finops` | `.github/agents/infra-finops.agent.md` | FinOps cost analysis & right-sizing |
 | `infra-code-reviewer` | `.github/agents/infra-code-reviewer.agent.md` | Code review before merge |
 
 Prompts are in `.github/prompts/` and skills in `.agents/skills/`.

@@ -1,6 +1,6 @@
 ---
 name: "infra-agent"
-description: "Thin coordinator that routes requests to single-task agents: infra-terraform, infra-mosquitto, infra-ci, infra-planner, infra-code-reviewer."
+description: "Thin coordinator that routes requests to single-task agents: infra-terraform, infra-mosquitto, infra-ci, infra-planner, infra-drift-security, infra-finops, infra-code-reviewer."
 handoffs:
   - label: Terraform Module
     agent: infra-terraform
@@ -18,6 +18,14 @@ handoffs:
     agent: infra-planner
     prompt: Generate an implementation plan for the task described above.
     send: false
+  - label: Drift & Security Scan
+    agent: infra-drift-security
+    prompt: Run the drift/security scan described above.
+    send: false
+  - label: FinOps Cost Analysis
+    agent: infra-finops
+    prompt: Run the cost analysis scan described above.
+    send: false
   - label: Review Code
     agent: infra-code-reviewer
     prompt: Review the code changes described above.
@@ -34,6 +42,8 @@ This agent does not implement tasks directly. It identifies the task type and ha
 | Configuring Mosquitto MQTT broker, bridges, auth, or listeners | `infra-mosquitto` agent |
 | Creating/updating GitHub Actions CI workflows for infra checks | `infra-ci` agent |
 | Generating an implementation plan before coding | `infra-planner` agent |
+| Running drift detection and security misconfiguration scans | `infra-drift-security` agent |
+| Running FinOps cost analysis and right-sizing scans | `infra-finops` agent |
 | Reviewing code changes before merge | `infra-code-reviewer` agent |
 
 **When the task is ambiguous:** Ask the user to clarify which domain the request falls into, then hand off to the correct single-task agent.
